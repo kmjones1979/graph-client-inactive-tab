@@ -1,0 +1,11 @@
+# .graphclientrc.yml
+sources:
+  - name: mainnet
+    handler:
+      graphql:
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/889b5264a0b068776cac7a07fc641e6f/subgraphs/id/HUZDsRpEVP2AvzDCyzDHtdc64dyDxx8FQjzsmqSg4H3B
+plugins:
+  - pollingLive:
+      defaultInterval: 1000
+documents:
+  - "./queries/*.graphql"
