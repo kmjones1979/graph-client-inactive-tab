@@ -1,4 +1,4 @@
-query MyQuery {
+query MyQuery @live {
   transactions(first: 1, orderBy: timestamp, orderDirection: desc) {
     swaps(first: 1) {
       amount0
