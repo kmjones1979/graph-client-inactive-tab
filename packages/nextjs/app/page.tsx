@@ -11,15 +11,19 @@ const Home: NextPage = () => {
   const [result, setResult] = useState<ExecutionResult<MyQueryQuery> | null>(null);
 
   useEffect(() => {
-    // Define an async function to handle the subscription and fetching logic
+    let shouldContinue = true; // Flag to control the subscription lifecycle
+
     const fetchData = async () => {
       try {
         const fetchedResult = await subscribe(MyQueryDocument, {});
         if ("data" in fetchedResult) {
-          setResult(fetchedResult);
+          if (shouldContinue) {
+            setResult(fetchedResult);
+          }
         } else {
           for await (const result of fetchedResult) {
-            setResult(fetchedResult);
+            if (!shouldContinue) break;
+            setResult(result);
             console.log(result);
           }
         }
@@ -28,12 +32,37 @@ const Home: NextPage = () => {
       }
     };
 
-    fetchData(); // Call the async function to fetch the data when the component mounts
-  }, []); // Empty dependency array to ensure this effect runs only once on component mount
+    fetchData();
+
+    return () => {
+      shouldContinue = false; // Clean up the subscription when the component unmounts
+    };
+  }, []); // Ensures it runs only once
 
   return (
     <>
-      <div></div>
+      <div className="flex items-center flex-col flex-grow pt-10">
+        <div className="px-5">
+          <h1 className="text-center">
+            <span className="block text-4xl font-bold">Query The Graph</span>
+          </h1>
+        </div>
+        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
+          <ul>
+            {result?.data?.transactions.map((transaction, txnIndex) =>
+              transaction.swaps.map((swap, swapIndex) => (
+                <li key={`${txnIndex}-${swapIndex}`}>
+                  <div>Amount0: {swap?.amount0 ?? "N/A"}</div>
+                  <div>Amount1: {swap?.amount1 ?? "N/A"}</div>
+                  <div>USD Amount: {swap?.amountUSD ?? "N/A"}</div>
+                  <div>Pool Token0: {swap?.pool.token0?.name ?? "Unknown"}</div>
+                  <div>Pool Token1: {swap?.pool.token1?.name ?? "Unknown"}</div>
+                </li>
+              )),
+            )}
+          </ul>
+        </div>
+      </div>
     </>
   );
 };
